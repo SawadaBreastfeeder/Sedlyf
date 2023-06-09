@@ -32,13 +32,17 @@ def rename_file(update, context):
 
         return
 
-    
+    # Check if a document is attached
+
+    if not update.message.document:
+
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Please attach a file to rename.")
+
+        return
 
     file_name = " ".join(context.args)
 
     file_id = update.message.document.file_id
-
-    
 
     # Download the file
 
@@ -54,8 +58,6 @@ def rename_file(update, context):
 
     download_speed = os.path.getsize(file_path) / download_time / 1024  # in KB/s
 
-    
-
     # Rename the file
 
     renamed_file_path = "renamed_" + file_name
@@ -63,8 +65,6 @@ def rename_file(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Renaming file...")
 
     os.rename(file_path, renamed_file_path)
-
-    
 
     # Upload the renamed file
 
@@ -80,27 +80,17 @@ def rename_file(update, context):
 
     upload_speed = os.path.getsize(renamed_file_path) / upload_time / 1024  # in KB/s
 
-    
-
     # Send the summary
 
     summary = f"File renamed and uploaded successfully!\n\nDownload Speed: {download_speed:.2f} KB/s\nUpload Speed: {upload_speed:.2f} KB/s"
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=summary)
 
-    
-
     # Remove the files
 
     os.remove(renamed_file_path)
 
-# Add handlers to the updater
 
-updater.dispatcher.add_handler(CommandHandler('start', start))
 
-updater.dispatcher.add_handler(CommandHandler('rename', rename_file))
 
-# Start the bot
-
-updater.start_polling()
 
